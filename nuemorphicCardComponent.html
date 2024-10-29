@@ -41,36 +41,30 @@
   </div>
 </body>
 <style>
+/* Importing the 'Outfit' font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
 
+/* Root element where custom CSS variables are defined */
 :root {
-    
     font-size: 15px;
-    
-    /* Primary */
+
+    /* Primary Colors */
     --var-soft-blue: hsl(215, 51%, 70%);
     --var-cyan: hsl(178, 100%, 50%);
-    /* Neutral */
+
+    /* Neutral Colors */
     --var-main-darkest: hsl(217, 54%, 11%);
     --var-card-dark: hsl(216, 50%, 16%);
     --var-line-dark: hsl(215, 32%, 27%);
     --var-lightest: white;
-    
+
     /* Fonts */
-    
     --var-heading: normal normal 600 1.5em/1.6em 'Outfit', sans-serif;
-    
     --var-small-heading: normal normal 400 1em/1em 'Outfit', sans-serif;
-    
     --var-para: normal normal 300 1em/1.55em 'Outfit', sans-serif;
 }
 
-/* 
-=======================
-Setup
-=======================
-*/
-
+/* Setting the box-sizing model to border-box for all elements */
 html {
     box-sizing: border-box;
 }
@@ -80,60 +74,49 @@ html {
     margin: 0;
 }
 
+/* Styling for the body element */
 body {
     background-color: var(--var-main-darkest);
 }
 
+/* Image styling */
 img {
     width: 100%;
     border-radius: 15px;
     display: block;
 }
 
+/* Link styling */
 a {
     color: inherit;
 }
 
-/* 
-
-Eye view
-
-https://i.postimg.cc/9MtT4GZY/view.png' border='0' alt='view */
-
-/*
-=========================
-Font Styling
-=========================
-*/
-
+/* Heading 1 styling */
 h1 {
     font: var(--var-heading);
     color: var(--var-lightest);
     padding: 1.2em 0;
 }
 
+/* Heading 2 styling */
 h2 {
     font: var(--var-small-heading);
     color: var(--var-lightest);
     /* padding on .coin-base */
 }
 
+/* Paragraph styling */
 p {
     font: var(--var-para);
     color: var(--var-soft-blue);
 }
 
+/* Span styling */
 span {
     color: white;
 }
-/* 
-=====================
-Classes
-=====================
-*/
 
-/* LAYOUT */
-
+/* Card container styling */
 .card-container {
     width: 100%;
     max-width: 400px;
@@ -144,32 +127,33 @@ Classes
     padding: 2rem;
 }
 
+/* Flex row styling */
 div.flex-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+/* Coin base, time left, and card attribute styling */
 div.coin-base, .time-left, .card-attribute {
     display: flex;
     align-items: center;
     padding: 1em 0;
 }
 
+/* Card attribute styling */
 .card-attribute {
     padding-bottom: 1.5em;
     border-top: 2px solid var(--var-line-dark);
 }
 
+/* Hero image container styling */
 a.hero-image-container {
     position: relative;
     display: block;
 }
 
-
-
-/* Details */
-
+/* Eye image styling */
 img.eye {
     position: absolute;
     width: 100%;
@@ -178,12 +162,14 @@ img.eye {
     left: 43%;
 }
 
+/* Media query for larger eye image on wider screens */
 @media (min-width:400px) {
   img.eye {
     max-width: 3em;
-}
+  }
 }
 
+/* Hero image container hover effect */
 .hero-image-container::after {
     content: '';
     background-image: url("https://i.postimg.cc/9MtT4GZY/view.png");
@@ -203,15 +189,18 @@ img.eye {
     transition: opacity 0.3s ease-out;
 }
 
+/* Hero image container hover state */
 .hero-image-container:hover::after {
   opacity: 1;
 }
 
+/* Small image styling */
 .small-image {
     width: 1.2em;
     margin-right: .5em;
 }
 
+/* Small avatar styling */
 .small-avatar {
     width: 2em;
     border-radius: 200px;
@@ -219,6 +208,7 @@ img.eye {
     margin-right: 1.4em;
 }
 
+/* Attribution styling */
 div.attribution {
     margin: 0 auto;
     width: 100%;
@@ -227,15 +217,19 @@ div.attribution {
     padding: 1.5em 0 4em 0;
     color: var(--var-line-dark);
 }
+
+/* Attribution link styling */
 .attribution a {
     color: var(--var-soft-blue);
 }
 
+/* Media query for larger font size on wider screens */
 @media (min-width:600px) {
     body {
         font-size: 18px;
     }
 }
+
 </style>>
   
 </body>
