@@ -217,7 +217,11 @@
           file.name.endsWith('.mp4') ||
           file.name.endsWith('.mkv') ||
           file.name.endsWith('.avi') ||
-          file.name.endsWith('.mov')
+          file.name.endsWith('.mov') ||
+          file.name.endsWith('.flv') ||
+          file.name.endsWith('.webm')
+          file.name.endsWith('.wmv')
+
         );
         if (file) {
           file.renderTo('#videoPlayer', () => {
