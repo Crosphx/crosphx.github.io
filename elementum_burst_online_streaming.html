@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebTorrent Streaming App</title>
+  <title>WebTorrent App with Pirate Bay</title>
   <script src="https://cdn.jsdelivr.net/npm/webtorrent/webtorrent.min.js"></script>
   <style>
     body {
@@ -11,12 +11,12 @@
       margin: 20px;
       text-align: center;
     }
-    input, button, select {
+    input, button {
       padding: 10px;
       margin: 10px;
       font-size: 16px;
     }
-    .movie {
+    .movie, .torrent {
       border: 1px solid #ccc;
       margin: 10px;
       padding: 10px;
@@ -36,60 +36,86 @@
   </style>
 </head>
 <body>
-  <h1>WebTorrent Streaming App</h1>
+  <h1>WebTorrent App with YTS & The Pirate Bay</h1>
 
-  <!-- Search Bar -->
-  <input type="text" id="searchQuery" placeholder="Search for movies...">
-  <button onclick="searchMovies()">Search</button>
+  <!-- Search Section -->
+  <input type="text" id="searchQuery" placeholder="Search for movies or torrents...">
+  <button onclick="searchYTS()">Search YTS</button>
+  <button onclick="searchTPB()">Search TPB</button>
 
-  <!-- Results -->
-  <div id="movieList"></div>
+  <!-- Results Section -->
+  <div id="results"></div>
 
   <!-- Video Player -->
   <video id="videoPlayer" controls></video>
 
   <script>
     const client = new WebTorrent();
-    const API_URL = 'https://yts.mx/api/v2/list_movies.json';
 
-    // Search for movies
-    async function searchMovies() {
-      const query = document.getElementById('searchQuery').value;
-      const response = await fetch(`${API_URL}?query_term=${encodeURIComponent(query)}`);
-      const data = await response.json();
+    // Search YTS API
+    async function searchYTS() {
+constquery=document.getElementById('searchQuery').value;
+constAPI_URL=`https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}`;
+constresponse=awaitfetch(API_URL);
+constdata=awaitresponse.json();
 
-      if (data.data.movies) {
-        displayMovies(data.data.movies);
+if (data.data.movies) {
+displayResults(data.data.movies,'yts');
       } else {
-        alert('No movies found!');
+alert('No movies found on YTS!');
       }
     }
 
-    // Display movie results
-    function displayMovies(movies) {
-      const movieList = document.getElementById('movieList');
-      movieList.innerHTML = '';
+// Search The Pirate Bay
+asyncfunctionsearchTPB() {
+constquery=document.getElementById('searchQuery').value;
+constTPB_URL=`https://apibay.org/q.php?q=${encodeURIComponent(query)}`;
+constresponse=awaitfetch(TPB_URL);
+consttorrents=awaitresponse.json();
 
-      movies.forEach(movie => {
-        const movieDiv = document.createElement('div');
-        movieDiv.className = 'movie';
-        movieDiv.innerHTML = `
-          <img src="${movie.medium_cover_image}" alt="${movie.title}">
-          <h3>${movie.title}</h3>
-          <button onclick="playTorrent('${movie.torrents[0].url}')">Play</button>
-        `;
-        movieList.appendChild(movieDiv);
+if (torrents.length) {
+displayResults(torrents,'tpb');
+      } else {
+alert('No torrents found on The Pirate Bay!');
+      }
+    }
+
+// Display Results
+functiondisplayResults(data,source) {
+constresults=document.getElementById('results');
+results.innerHTML='';
+
+data.forEach(item => {
+constdiv=document.createElement('div');
+div.className=source==='yts'?'movie':'torrent';
+
+if (source==='yts') {
+div.innerHTML=`
+            <img src="${item.medium_cover_image}" alt="${item.title}">
+            <h3>${item.title}</h3>
+            <button onclick="playTorrent('${item.torrents[0].url}')">Play</button>
+          `;
+        } elseif (source==='tpb') {
+constmagnet=`magnet:?xt=urn:btih:${item.info_hash}&dn=${encodeURIComponent(item.name)}`;
+div.innerHTML=`
+            <h3>${item.name}</h3>
+            <p>Seeds: ${item.seeders}</p>
+            <button onclick="playTorrent('${magnet}')">Play</button>
+          `;
+        }
+
+results.appendChild(div);
       });
     }
 
-    // Play torrent in video player
-    function playTorrent(torrentUrl) {
-      client.add(torrentUrl, torrent => {
-        const file = torrent.files.find(file => file.name.endsWith('.mp4'));
-        if (file) {
-          file.renderTo('#videoPlayer');
+// Play Torrent
+functionplayTorrent(torrentUrl) {
+client.add(torrentUrl,torrent => {
+constfile=torrent.files.find(file => file.name.endsWith('.mp4'));
+if (file) {
+file.renderTo('#videoPlayer');
         } else {
-          alert('No playable video found in this torrent.');
+alert('No playable video found in this torrent.');
         }
       });
     }
