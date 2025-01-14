@@ -1,4 +1,98 @@
 <!DOCTYPE html>
-<html>
-  
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebTorrent Streaming App</title>
+  <script src="https://cdn.jsdelivr.net/npm/webtorrent/webtorrent.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    .movie {
+      border: 1px solid #ccc;
+      margin: 10px;
+      padding: 10px;
+      display: inline-block;
+      width: 200px;
+      vertical-align: top;
+    }
+    .movie img {
+      width: 100%;
+    }
+    video {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebTorrent Streaming App</h1>
+
+  <!-- Search Bar -->
+  <input type="text" id="searchQuery" placeholder="Search for movies...">
+  <button onclick="searchMovies()">Search</button>
+
+  <!-- Results -->
+  <div id="movieList"></div>
+
+  <!-- Video Player -->
+  <video id="videoPlayer" controls></video>
+
+  <script>
+    const client = new WebTorrent();
+    const API_URL = 'https://yts.mx/api/v2/list_movies.json';
+
+    // Search for movies
+    async function searchMovies() {
+      const query = document.getElementById('searchQuery').value;
+      const response = await fetch(`${API_URL}?query_term=${encodeURIComponent(query)}`);
+      const data = await response.json();
+
+      if (data.data.movies) {
+        displayMovies(data.data.movies);
+      } else {
+        alert('No movies found!');
+      }
+    }
+
+    // Display movie results
+    function displayMovies(movies) {
+      const movieList = document.getElementById('movieList');
+      movieList.innerHTML = '';
+
+      movies.forEach(movie => {
+        const movieDiv = document.createElement('div');
+        movieDiv.className = 'movie';
+        movieDiv.innerHTML = `
+          <img src="${movie.medium_cover_image}" alt="${movie.title}">
+          <h3>${movie.title}</h3>
+          <button onclick="playTorrent('${movie.torrents[0].url}')">Play</button>
+        `;
+        movieList.appendChild(movieDiv);
+      });
+    }
+
+    // Play torrent in video player
+    function playTorrent(torrentUrl) {
+      client.add(torrentUrl, torrent => {
+        const file = torrent.files.find(file => file.name.endsWith('.mp4'));
+        if (file) {
+          file.renderTo('#videoPlayer');
+        } else {
+          alert('No playable video found in this torrent.');
+        }
+      });
+    }
+  </script>
+</body>
 </html>
