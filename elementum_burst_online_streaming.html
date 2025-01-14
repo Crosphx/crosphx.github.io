@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebTorrent App with Pirate Bay</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebTorrent App with Status Logs</title>
   <script src="https://cdn.jsdelivr.net/npm/webtorrent/webtorrent.min.js"></script>
   <style>
     body {
@@ -33,13 +33,51 @@
       margin: 20px auto;
       display: block;
     }
+    #statusBox {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      height: 200px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    .log-progress {
+      color: blue;
+    }
+    .log-complete {
+      color: green;
+    }
+    .log-error {
+      color: red;
+    }
+    .progress-bar {
+      background-color: #f3f3f3;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background-color: #4caf50;
+      width: 0%;
+      height: 20px;
+      text-align: center;
+      color: white;
+      line-height: 20px;
+      transition: width 0.2s;
+    }
   </style>
 </head>
 <body>
-  <h1>WebTorrent App with YTS & The Pirate Bay</h1>
+  <h1>WebTorrent App with YTS, TPB & Logs</h1>
 
   <!-- Search Section -->
-  <input type="text" id="searchQuery" placeholder="Search for movies or torrents...">
+  <input type="text" id="searchQuery" placeholder="Search for movies or torrents..." />
   <button onclick="searchYTS()">Search YTS</button>
   <button onclick="searchTPB()">Search TPB</button>
 
@@ -49,74 +87,129 @@
   <!-- Video Player -->
   <video id="videoPlayer" controls></video>
 
+  <!-- Status Box -->
+  <div id="statusBox"></div>
+
   <script>
     const client = new WebTorrent();
 
+    // Append log messages to the status box
+    function logMessage(message, type) {
+      const statusBox = document.getElementById('statusBox');
+      const log = document.createElement('div');
+      log.className = `log-${type}`;
+      log.innerHTML = message;
+      statusBox.appendChild(log);
+      statusBox.scrollTop = statusBox.scrollHeight; // Auto-scroll to the latest log
+    }
+
+    // Update the progress bar
+    function updateProgressBar(progress) {
+      const progressBarFill = document.querySelector('.progress-bar-fill');
+      progressBarFill.style.width = `${progress}%`;
+      progressBarFill.textContent = `${progress}%`;
+    }
+
     // Search YTS API
     async function searchYTS() {
-constquery=document.getElementById('searchQuery').value;
-constAPI_URL=`https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}`;
-constresponse=awaitfetch(API_URL);
-constdata=awaitresponse.json();
+      const query = document.getElementById('searchQuery').value;
+      const API_URL = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}`;
+      logMessage(`Searching YTS for "${query}"...`, 'progress');
 
-if (data.data.movies) {
-displayResults(data.data.movies,'yts');
-      } else {
-alert('No movies found on YTS!');
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (data.data.movies) {
+          displayResults(data.data.movies, 'yts');
+          logMessage(`Found ${data.data.movies.length} movies on YTS.`, 'complete');
+        } else {
+          logMessage('No movies found on YTS!', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error searching YTS: ${error.message}`, 'error');
       }
     }
 
-// Search The Pirate Bay
-asyncfunctionsearchTPB() {
-constquery=document.getElementById('searchQuery').value;
-constTPB_URL=`https://apibay.org/q.php?q=${encodeURIComponent(query)}`;
-constresponse=awaitfetch(TPB_URL);
-consttorrents=awaitresponse.json();
+    // Search The Pirate Bay
+    async function searchTPB() {
+      const query = document.getElementById('searchQuery').value;
+      const TPB_URL = `https://tpb.party/search/${encodeURIComponent(query)}/1/99/0`;
+      logMessage(`Searching TPB for "${query}"...`, 'progress');
 
-if (torrents.length) {
-displayResults(torrents,'tpb');
-      } else {
-alert('No torrents found on The Pirate Bay!');
+      try {
+        const response = await fetch(TPB_URL);
+        const torrents = await response.json();
+
+        if (torrents.length) {
+          displayResults(torrents, 'tpb');
+          logMessage(`Found ${torrents.length} torrents on TPB.`, 'complete');
+        } else {
+          logMessage('No torrents found on TPB!', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error searching TPB: ${error.message}`, 'error');
       }
     }
 
-// Display Results
-functiondisplayResults(data,source) {
-constresults=document.getElementById('results');
-results.innerHTML='';
+    // Display Results
+    function displayResults(data, source) {
+      const results = document.getElementById('results');
+      results.innerHTML = '';
 
-data.forEach(item => {
-constdiv=document.createElement('div');
-div.className=source==='yts'?'movie':'torrent';
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = source === 'yts' ? 'movie' : 'torrent';
 
-if (source==='yts') {
-div.innerHTML=`
-            <img src="${item.medium_cover_image}" alt="${item.title}">
+        if (source === 'yts') {
+          div.innerHTML = `
+            <img src="${item.medium_cover_image}" alt="${item.title}" />
             <h3>${item.title}</h3>
             <button onclick="playTorrent('${item.torrents[0].url}')">Play</button>
           `;
-        } elseif (source==='tpb') {
-constmagnet=`magnet:?xt=urn:btih:${item.info_hash}&dn=${encodeURIComponent(item.name)}`;
-div.innerHTML=`
+        } else if (source === 'tpb') {
+          const magnet = `magnet:?xt=urn:btih:${item.info_hash}&dn=${encodeURIComponent(item.name)}`;
+          div.innerHTML = `
             <h3>${item.name}</h3>
             <p>Seeds: ${item.seeders}</p>
             <button onclick="playTorrent('${magnet}')">Play</button>
           `;
         }
 
-results.appendChild(div);
+        results.appendChild(div);
       });
     }
 
-// Play Torrent
-functionplayTorrent(torrentUrl) {
-client.add(torrentUrl,torrent => {
-constfile=torrent.files.find(file => file.name.endsWith('.mp4'));
-if (file) {
-file.renderTo('#videoPlayer');
+    // Play Torrent
+    function playTorrent(torrentUrl) {
+      logMessage('Starting torrent download...', 'progress');
+
+      client.add(torrentUrl, torrent => {
+        logMessage(`Downloading "${torrent.name}"...`, 'progress');
+
+        const file = torrent.files.find(file => 
+          file.name.endsWith('.mp4') ||
+          file.name.endsWith('.mkv') ||
+          file.name.endsWith('.avi') ||
+          file.name.endsWith('.mov')
+        );
+        if (file) {
+          file.renderTo('#videoPlayer', () => {
+            logMessage(`Streaming "${file.name}" complete.`, 'complete');
+          });
         } else {
-alert('No playable video found in this torrent.');
+          logMessage('No playable video found in this torrent.', 'error');
         }
+
+        torrent.on('download', bytes => {
+          const progress = (torrent.downloaded / torrent.length * 100).toFixed(2);
+          updateProgressBar(progress);
+          logMessage(`Progress: ${progress}%`, 'progress');
+        });
+
+        torrent.on('done', () => {
+          logMessage('Torrent download complete.', 'complete');
+        });
       });
     }
   </script>
